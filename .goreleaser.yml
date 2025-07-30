@@ -1,0 +1,60 @@
+version: 2
+builds:
+  - main: cmd/${GITHUB_REPOSITORY#*/}/main.go
+    binary: ${GITHUB_REPOSITORY#*/}
+    flags: -tags netgo
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+      - -X {{ .Env.SERVICE_NAME }}/internal/version.BuildTime={{.Date}}
+      - -X {{ .Env.SERVICE_NAME }}/internal/version.Commit={{.FullCommit}}
+      - -X {{ .Env.SERVICE_NAME }}/internal/version.Version={{.Version}}
+      - -X github.com/prometheus/common/version.Version={{.Version}}
+      - -X github.com/prometheus/common/version.Revision={{.Version}}
+      - -X github.com/prometheus/common/version.Branch={{.Branch}}
+      - -X github.com/prometheus/common/version.BuildUser="${{ github.actor }}"
+      - -X github.com/prometheus/common/version.BuildDate={{.Date}}
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+      - goos: windows
+        goarch: 386
+      - goos: windows
+        goarch: amd64
+dockers:
+  - image_templates:
+      - "ghcr.io/${GITHUB_REPOSITORY%/*}/${GITHUB_REPOSITORY#*/}:{{ .Version }}"
+      - "ghcr.io/${GITHUB_REPOSITORY%/*}/${GITHUB_REPOSITORY#*/}:latest"
+    dockerfile: 'Dockerfile'
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--build-arg=SERVICE_NAME=${GITHUB_REPOSITORY#*/}"
+archives:
+  - name_template: "${GITHUB_REPOSITORY#*/}-{{ .Version }}.{{ .Os }}-{{ .Arch }}"
+    wrap_in_directory: true
+checksum:
+  name_template: checksums.txt
+nfpms:
+  - homepage: https://github.com/${GITHUB_REPOSITORY%/*}/${GITHUB_REPOSITORY#*/}
+    maintainer: "{{ .Env.MAINTAINER_EMAIL || 'Maintainer Email Here' }}"
+    description: "{{ .Env.SERVICE_DESCRIPTION || 'Service Description Here' }}"
+    license: "{{ .Env.LICENSE_TYPE || 'MIT' }}"
+    formats:
+      - deb
+      - rpm
+    bindir: {{ .Env.SERVICE_BINARY_INSTALL_DIR }}/${GITHUB_REPOSITORY#*/}
+release:
+  github:
+    owner: ${GITHUB_REPOSITORY%/*}
+    name: ${GITHUB_REPOSITORY#*/}
+  draft: false
+  prerelease: false
