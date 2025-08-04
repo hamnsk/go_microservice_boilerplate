@@ -1,4 +1,4 @@
-name: Go Lint
+name: Go Vulncheck
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
 
 jobs:
 
-  linter:
-    name: lint
+  vulncheck:
+    name: Run govulncheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
