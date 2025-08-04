@@ -13,9 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Get Go version from go.mod file
+        id: go-version
+        run: awk '/^go / {print $2}' go.mod >> $GITHUB_OUTPUT
+      - name: Used Go version
+        run: echo "Go version is ${{ steps.go-version.outputs.version }}"
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.24.5'
+          go-version: '${{ steps.go-version.outputs.version }}'
           cache: false
 
       - name: golangci-lint
