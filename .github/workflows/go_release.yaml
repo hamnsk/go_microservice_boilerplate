@@ -26,10 +26,19 @@ jobs:
         run: echo "Repository license key is ${{ steps.get_license.outputs.license_type }}"
 
       - uses: actions/checkout@v4
+
+      - name: Get Go version from go.mod file
+        id: go-version
+        run: |
+          version=$(awk '/^go / {print $2}' go.mod)
+          echo "version=$version" >> $GITHUB_OUTPUT
+      - name: Used Go version
+        run: echo "Go version is ${{ steps.go-version.outputs.version }}"
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.5
+          go-version: '${{ steps.go-version.outputs.version }}'
 
       - name: Docker Login
         uses: docker/login-action@v2
