@@ -15,7 +15,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get Go version from go.mod file
         id: go-version
-        run: awk '/^go / {print $2}' go.mod >> $GITHUB_OUTPUT
+        run: |
+          version=$(awk '/^go / {print $2}' go.mod)
+          echo "version=$version" >> $GITHUB_OUTPUT
       - name: Used Go version
         run: echo "Go version is ${{ steps.go-version.outputs.version }}"
       - uses: actions/setup-go@v5
